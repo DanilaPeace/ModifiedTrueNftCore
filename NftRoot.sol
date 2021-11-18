@@ -16,10 +16,20 @@ contract NftRoot is DataResolver, IndexResolver {
     uint256 _totalMinted;
     address _addrBasis;
 
-    constructor(TvmCell codeIndex, TvmCell codeData) public {
+    // Variable to deploy the IndexBasis 
+    TvmCell _codeIndexBasis;
+
+    constructor(
+        TvmCell codeIndex, 
+        TvmCell codeData, 
+        TvmCell codeIndexBasis
+    ) public {
         tvm.accept();
         _codeIndex = codeIndex;
         _codeData = codeData;
+        _codeIndexBasis = codeIndexBasis;
+
+        deployBasis(_codeIndexBasis);
     }
 
     function mintNft() public {
@@ -31,7 +41,6 @@ contract NftRoot is DataResolver, IndexResolver {
     }
 
     function deployBasis(TvmCell codeIndexBasis) public {
-        require(msg.value > 0.5 ton, 104);
         uint256 codeHasData = resolveCodeHashData();
         TvmCell state = tvm.buildStateInit({
             contr: IndexBasis,
