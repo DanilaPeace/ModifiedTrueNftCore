@@ -17,17 +17,28 @@ contract Data is IData, IndexResolver {
 
     uint256 static _id;
 
-    constructor(address addrOwner, TvmCell codeIndex) public {
+    string _rarityType;
+
+    constructor(
+        address addrOwner,
+        TvmCell codeIndex,
+        string rarityType
+    ) public {
         optional(TvmCell) optSalt = tvm.codeSalt(tvm.code());
         require(optSalt.hasValue(), 101);
+
         (address addrRoot) = optSalt.get().toSlice().decode(address);
+        
         require(msg.sender == addrRoot);
         require(msg.value >= Constants.MIN_FOR_DEPLOY);
         tvm.accept();
+
         _addrRoot = addrRoot;
         _addrOwner = addrOwner;
         _addrAuthor = addrOwner;
         _codeIndex = codeIndex;
+
+        _rarityType = rarityType;
 
         deployIndex(addrOwner);
     }
