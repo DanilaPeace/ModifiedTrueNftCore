@@ -12,29 +12,29 @@ import './interfaces/IData.sol';
 import './interfaces/IIndexBasis.sol';
 
 contract NftRoot is DataResolver, IndexResolver {
-    uint256 _totalMinted;
+    uint _totalMinted;
     address _addrBasis;
 
     // Variable to deploy the IndexBasis 
     TvmCell _codeIndexBasis;
 
     // To limit the tokens amount
-    uint64 _tokenLimit;
-    mapping (string => uint32) _rarityTypes;
+    uint _tokenLimit;
+    mapping (string => uint) _rarityTypes;
     // To count when tokens are created
-    mapping (string => uint32) _rarityCounter;
+    mapping (string => uint) _rarityCounter;
 
     constructor(
         TvmCell codeIndex, 
         TvmCell codeData, 
         TvmCell codeIndexBasis,
-        uint32 tokenLimit,
+        uint tokenLimit,
         string[] rarityList,
-        uint32[] amountsForRarity
+        uint[] amountsForRarity
     ) public {
-        require(rarityList.length == amountsForRarity.length, 111, "The amount of rarity and amounts for it doen't match");
+        require(rarityList.length == amountsForRarity.length, 111, "The rarity and amounts for it doen't match");
 
-        // TODO: checking the summ of the entered amount of rarity   
+        // TODO: checking the summ of the entered amount of rarity  
         
         tvm.accept();
 
