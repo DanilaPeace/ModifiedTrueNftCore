@@ -19,15 +19,32 @@ contract NftRoot is DataResolver, IndexResolver {
     // Variable to deploy the IndexBasis 
     TvmCell _codeIndexBasis;
 
+    // To limit the tokens amount
+    uint64 _tokenLimit;
+    mapping (string => uint32) _rarityTypes;
+
     constructor(
         TvmCell codeIndex, 
         TvmCell codeData, 
-        TvmCell codeIndexBasis
+        TvmCell codeIndexBasis,
+        uint32 tokenLimit,
+        string[] rarityList,
+        uint32[] amountsForRarity
     ) public {
+        require(rarityList.length != amountsForRarity.length, 111, "The amount of rarity and amounts for it doen't match");
+
+        // TODO: checking the summ of the entered amount of rarity   
+        
         tvm.accept();
+
         _codeIndex = codeIndex;
         _codeData = codeData;
         _codeIndexBasis = codeIndexBasis;
+        _tokenLimit = tokenLimit;
+
+        for(uint i = 0; i < rarityList.length; i++) {
+            _rarityTypes[rarityList[i]] = amountsForRarity[i];
+        }
 
         deployBasis(_codeIndexBasis);
     }
