@@ -12,7 +12,6 @@ import './interfaces/IData.sol';
 import './interfaces/IIndexBasis.sol';
 
 contract NftRoot is DataResolver, IndexResolver {
-
     uint256 _totalMinted;
     address _addrBasis;
 
@@ -31,7 +30,7 @@ contract NftRoot is DataResolver, IndexResolver {
         string[] rarityList,
         uint32[] amountsForRarity
     ) public {
-        require(rarityList.length != amountsForRarity.length, 111, "The amount of rarity and amounts for it doen't match");
+        require(rarityList.length == amountsForRarity.length, 111, "The amount of rarity and amounts for it doen't match");
 
         // TODO: checking the summ of the entered amount of rarity   
         
@@ -52,7 +51,7 @@ contract NftRoot is DataResolver, IndexResolver {
     function mintNft() public {
         TvmCell codeData = _buildDataCode(address(this));
         TvmCell stateData = _buildDataState(codeData, _totalMinted);
-        new Data{stateInit: stateData, value: 1.1 ton}(msg.sender, _codeIndex);
+        new Data{stateInit: stateData, value: 1.1 ton, bounce: false}(msg.sender, _codeIndex);
 
         _totalMinted++;
     }
