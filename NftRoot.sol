@@ -21,6 +21,8 @@ contract NftRoot is DataResolver, IndexResolver {
     // To limit the tokens amount
     uint64 _tokenLimit;
     mapping (string => uint32) _rarityTypes;
+    // To count when tokens are created
+    mapping (string => uint32) _rarityCounter;
 
     constructor(
         TvmCell codeIndex, 
@@ -48,12 +50,18 @@ contract NftRoot is DataResolver, IndexResolver {
         deployBasis(_codeIndexBasis);
     }
 
-    function mintNft() public {
+    function mintNft(
+        string rarityType
+    ) public {
+        require(_rarityTypes.exists(rarityType), 112, "Such tokens there isn't in this collection");
+        require(_rarityCounter[rarityType] < _rarityTypes[rarityType], 113, "Tokens of this type cannot be created");
+
         TvmCell codeData = _buildDataCode(address(this));
         TvmCell stateData = _buildDataState(codeData, _totalMinted);
-        new Data{stateInit: stateData, value: 1.1 ton, bounce: false}(msg.sender, _codeIndex);
+        new Data{stateInit: stateData, value: 1.1 ton, bounce: false}(msg.sender, _codeIndex, rarityType);
 
         _totalMinted++;
+        _rarityCounter[rarityType]++;
     }
 
     function deployBasis(TvmCell codeIndexBasis) public {
