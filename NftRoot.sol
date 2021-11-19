@@ -33,9 +33,13 @@ contract NftRoot is DataResolver, IndexResolver {
         uint[] amountsForRarity
     ) public {
         require(rarityList.length == amountsForRarity.length, 111, "The rarity and amounts for it doen't match");
+        uint raritySumm = 0;
+        for (uint256 i = 0; i < amountsForRarity.length; i++) {
+            raritySumm += amountsForRarity[i];
+            _rarityTypes[rarityList[i]] = amountsForRarity[i];
+        }
+        require(raritySumm == _tokenLimit, 112, "The number of tokens does not correspond to the total number of their types");
 
-        // TODO: checking the summ of the entered amount of rarity  
-        
         tvm.accept();
 
         _codeIndex = codeIndex;
@@ -43,18 +47,12 @@ contract NftRoot is DataResolver, IndexResolver {
         _codeIndexBasis = codeIndexBasis;
         _tokenLimit = tokenLimit;
 
-        for(uint i = 0; i < rarityList.length; i++) {
-            _rarityTypes[rarityList[i]] = amountsForRarity[i];
-        }
-
         deployBasis(_codeIndexBasis);
     }
 
-    function mintNft(
-        string rarityType
-    ) public {
-        require(_rarityTypes.exists(rarityType), 112, "Such tokens there isn't in this collection");
-        require(_rarityCounter[rarityType] < _rarityTypes[rarityType], 113, "Tokens of this type cannot be created");
+    function mintNft(string rarityType) public {
+        require(_rarityTypes.exists(rarityType), 113, "Such tokens there isn't in this collection");
+        require(_rarityCounter[rarityType] < _rarityTypes[rarityType], 114, "Tokens of this type cannot be created");
 
         TvmCell codeData = _buildDataCode(address(this));
         TvmCell stateData = _buildDataState(codeData, _totalMinted);
