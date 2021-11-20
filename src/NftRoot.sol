@@ -63,6 +63,8 @@ contract NftRoot is DataResolver, IndexResolver {
     }
 
     function deployBasis(TvmCell codeIndexBasis) public {
+        require(msg.value > 0.5 ton, 104);
+
         uint256 codeHasData = resolveCodeHashData();
         TvmCell state = tvm.buildStateInit({
             contr: IndexBasis,
@@ -72,6 +74,7 @@ contract NftRoot is DataResolver, IndexResolver {
             },
             code: codeIndexBasis
         });
+        
         _addrBasis = new IndexBasis{stateInit: state, value: 0.4 ton}();
     }
 
