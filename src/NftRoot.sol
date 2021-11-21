@@ -41,14 +41,14 @@ contract NftRoot is DataResolver, IndexResolver {
         uint tokensLimit,
         Rarity[] raritiesList
     ) public {
+        require(
+            checkRaritiesCorrectness(raritiesList, tokensLimit), 
+            RARITY_AMOUNT_MISMATCH,
+            "The number of tokens does not correspond to the total number of their types"
+        );
         tvm.accept();
 
-        uint raritySumm = 0;
-        for (uint256 i = 0; i < raritiesList.length; i++) {
-            raritySumm += raritiesList[i].amount;
-            _rarityTypes[raritiesList[i].rarityName] = raritiesList[i].amount;
-        }
-        require(raritySumm == tokensLimit, RARITY_AMOUNT_MISMATCH, "The number of tokens does not correspond to the total number of their types");
+        createRarityTypes(raritiesList);
 
         _codeIndex = codeIndex;
         _codeData = codeData;
@@ -58,9 +58,33 @@ contract NftRoot is DataResolver, IndexResolver {
         deployBasis(_codeIndexBasis);
     }
 
+    function createRarityTypes(Rarity[] listOfRarities) private{
+        for (uint256 i = 0; i < listOfRarities.length; i++) {
+            _rarityTypes[listOfRarities[i].rarityName] = listOfRarities[i].amount;
+        }
+    }
+
+    function checkRaritiesCorrectness(Rarity[] listOfRarities, uint tokensLimit) private returns (bool) {
+        // Checks if the sum of the entered rarity is equal to the total number of tokens
+        uint raritySumm = 0;
+        for (uint256 i = 0; i < listOfRarities.length; i++) {
+            raritySumm += listOfRarities[i].amount;
+        }
+
+        return raritySumm == tokensLimit;
+    }
+
     function mintNft(string rarity) public {
-        require(_rarityTypes.exists(rarity), NON_EXISTENT_RARITY, "Such tokens there isn't in this collection");
-        require(_rarityMintedCounter[rarity] < _rarityTypes[rarity], RARITY_OVERFLOW, "Tokens of this type cannot be created");
+        require(
+            _rarityTypes.exists(rarity), 
+            NON_EXISTENT_RARITY, 
+            "Such tokens there isn't in this collection"
+        );
+        require(
+            _rarityMintedCounter[rarity] < _rarityTypes[rarity],
+            RARITY_OVERFLOW,
+            "Tokens of this type can no longer be created"
+        );
 
         TvmCell codeData = _buildDataCode(address(this));
         TvmCell stateData = _buildDataState(codeData, _totalMinted);
