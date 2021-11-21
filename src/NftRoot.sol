@@ -11,12 +11,16 @@ import './IndexBasis.sol';
 import './interfaces/IData.sol';
 import './interfaces/IIndexBasis.sol';
 
+struct Rarity {
+    string rarityName;
+    uint amount;
+}
+
 contract NftRoot is DataResolver, IndexResolver {
     //Errors
-    uint8 constant AMOUNT_MISMATCH = 111;
-    uint8 constant RARITY_AMOUNT_MISMATCH = 112;
-    uint8 constant NON_EXISTENT_RARITY = 113;
-    uint8 constant RARITY_OVERFLOW = 114;
+    uint8 constant RARITY_AMOUNT_MISMATCH = 111;
+    uint8 constant NON_EXISTENT_RARITY = 112;
+    uint8 constant RARITY_OVERFLOW = 113;
     
     uint _totalMinted;
     address _addrBasis;
@@ -35,16 +39,14 @@ contract NftRoot is DataResolver, IndexResolver {
         TvmCell codeData, 
         TvmCell codeIndexBasis,
         uint tokensLimit,
-        string[] rarityList,
-        uint[] amountsForRarity
+        Rarity[] raritiesList
     ) public {
-        require(rarityList.length == amountsForRarity.length, AMOUNT_MISMATCH, "The rarity and amounts for it doen't match");
         tvm.accept();
 
         uint raritySumm = 0;
-        for (uint256 i = 0; i < amountsForRarity.length; i++) {
-            raritySumm += amountsForRarity[i];
-            _rarityTypes[rarityList[i]] = amountsForRarity[i];
+        for (uint256 i = 0; i < raritiesList.length; i++) {
+            raritySumm += raritiesList[i].amount;
+            _rarityTypes[raritiesList[i].rarityName] = raritiesList[i].amount;
         }
         require(raritySumm == tokensLimit, RARITY_AMOUNT_MISMATCH, "The number of tokens does not correspond to the total number of their types");
 
@@ -56,9 +58,9 @@ contract NftRoot is DataResolver, IndexResolver {
         deployBasis(_codeIndexBasis);
     }
 
-    function mintNft(string rarityType) public {
-        require(_rarityTypes.exists(rarityType), NON_EXISTENT_RARITY, "Such tokens there isn't in this collection");
-        require(_rarityMintedCounter[rarityType] < _rarityTypes[rarityType], RARITY_OVERFLOW, "Tokens of this type cannot be created");
+    function mintNft(string rarity) public {
+        require(_rarityTypes.exists(rarity), NON_EXISTENT_RARITY, "Such tokens there isn't in this collection");
+        require(_rarityMintedCounter[rarity] < _rarityTypes[rarity], RARITY_OVERFLOW, "Tokens of this type cannot be created");
 
         TvmCell codeData = _buildDataCode(address(this));
         TvmCell stateData = _buildDataState(codeData, _totalMinted);
@@ -67,10 +69,10 @@ contract NftRoot is DataResolver, IndexResolver {
             stateInit: stateData, 
             value: 1.1 ton, 
             bounce: false
-        }(msg.sender, _codeIndex, rarityType);
+        }(msg.sender, _codeIndex, rarity);
 
         _totalMinted++;
-        _rarityMintedCounter[rarityType]++;
+        _rarityMintedCounter[rarity]++;
     }
 
     function deployBasis(TvmCell codeIndexBasis) public {
