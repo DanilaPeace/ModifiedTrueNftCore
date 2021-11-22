@@ -18,6 +18,7 @@ struct Rarity {
 
 contract NftRoot is DataResolver, IndexResolver {
     //Errors
+    uint8 constant NOT_OWNER_ERROR = 110;
     uint8 constant RARITY_AMOUNT_MISMATCH = 111;
     uint8 constant NON_EXISTENT_RARITY = 112;
     uint8 constant RARITY_OVERFLOW = 113;
@@ -34,7 +35,26 @@ contract NftRoot is DataResolver, IndexResolver {
     // To count when tokens are created
     mapping (string => uint) _rarityMintedCounter;
 
+    bytes _rootIcon;
+    string _rootName;
+
+    modifier onlyOwner() {
+        require(msg.pubkey() == tvm.pubkey(), NOT_OWNER_ERROR, "Only owner can do this operation");
+        tvm.accept();
+        _;
+    }
+
+    function setName(string rootName) public onlyOwner{
+        _rootName = rootName;
+    }
+
+    function setIcon(bytes icon) public onlyOwner{
+        _rootIcon = icon;
+    }
+
     constructor(
+        string rootName,
+        bytes rootIcon,
         TvmCell codeIndex, 
         TvmCell codeData, 
         TvmCell codeIndexBasis,
@@ -49,6 +69,8 @@ contract NftRoot is DataResolver, IndexResolver {
         tvm.accept();
 
         createRarityTypes(raritiesList);
+        setName(rootName);
+        setIcon(rootIcon);
 
         _codeIndex = codeIndex;
         _codeData = codeData;
