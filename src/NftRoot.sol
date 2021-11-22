@@ -11,6 +11,7 @@ import './IndexBasis.sol';
 import './interfaces/IData.sol';
 import './interfaces/IIndexBasis.sol';
 
+
 struct Rarity {
     string rarityName;
     uint amount;
@@ -72,10 +73,12 @@ contract NftRoot is DataResolver, IndexResolver {
         setName(rootName);
         setIcon(rootIcon);
 
+
         _codeIndex = codeIndex;
         _codeData = codeData;
         _codeIndexBasis = codeIndexBasis;
         _tokensLimit = tokensLimit;
+
 
         deployBasis(_codeIndexBasis);
     }
@@ -119,6 +122,7 @@ contract NftRoot is DataResolver, IndexResolver {
 
         _totalMinted++;
         _rarityMintedCounter[rarity]++;
+
     }
 
     function deployBasis(TvmCell codeIndexBasis) public {
